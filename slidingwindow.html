@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sliding Puzzle</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .puzzle {
+      width: 300px;
+      height: 300px;
+      margin: auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 5px;
+    }
+
+    .tile {
+      background: #4CAF50;
+      color: white;
+      font-size: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .empty {
+      background: #ddd;
+      cursor: default;
+    }
+
+    #stats {
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    #winMsg {
+      margin-top: 15px;
+      font-size: 22px;
+      color: green;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Sliding Puzzle Game (3 × 3)</h2>
+
+<div id="stats">
+  ⏱ Time: <span id="time">0</span> sec  
+  &nbsp;&nbsp; | &nbsp;&nbsp;
+  🔁 Steps: <span id="steps">0</span>
+</div>
+
+<div class="puzzle" id="puzzle"></div>
+
+<div id="winMsg"></div>
+
+<script>
+  let numbers = [1, 2, 3, 4, 5, 6, 7, 8, ""];
+  let steps = 0;
+  let seconds = 0;
+  let timer;
+
+  // Shuffle the puzzle at start
+  function shufflePuzzle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      let j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  numbers = shufflePuzzle(numbers);
+
+  // Start timer
+  function startTimer() {
+    timer = setInterval(() => {
+      seconds++;
+      document.getElementById("time").textContent = seconds;
+    }, 1000);
+  }
+  startTimer();
+
+  function loadPuzzle() {
+    let board = document.getElementById("puzzle");
+    board.innerHTML = "";
+
+    numbers.forEach((num, index) => {
+      let tile = document.createElement("div");
+      tile.className = num === "" ? "tile empty" : "tile";
+      tile.textContent = num;
+
+      tile.addEventListener("click", () => moveTile(index));
+
+      board.appendChild(tile);
+    });
+  }
+
+  function moveTile(index) {
+    let emptyIndex = numbers.indexOf("");
+
+    let validMoves = [
+      emptyIndex - 1, emptyIndex + 1,
+      emptyIndex - 3, emptyIndex + 3
+    ];
+
+    if (validMoves.includes(index)) {
+      [numbers[index], numbers[emptyIndex]] = 
+      [numbers[emptyIndex], numbers[index]];
+
+      steps++;
+      document.getElementById("steps").textContent = steps;
+
+      loadPuzzle();
+      checkWin();
+    }
+  }
+
+  // Check if solved
+  function checkWin() {
+    let solved = [1,2,3,4,5,6,7,8,""].every(
+      (val, i) => val === numbers[i]
+    );
+
+    if (solved) {
+      clearInterval(timer);
+      document.getElementById("winMsg").textContent =
+        "🎉 Congratulations! You solved the puzzle!";
+    }
+  }
+
+  loadPuzzle();
+</script>
+
+</body>
+</html>
